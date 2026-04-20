@@ -1,0 +1,178 @@
+# 1
+
+CREATE SCHEMA IF NOT EXISTS `LibraryManagement`;
+USE LibraryManagement;
+
+CREATE TABLE IF NOT EXISTS `authors`
+(author_id INT auto_increment PRIMARY KEY,
+author_name VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS `genres`
+(genre_id INT auto_increment PRIMARY KEY,
+genre_name VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS `books`
+(book_id INT auto_increment PRIMARY KEY,
+title VARCHAR(50) NOT NULL,
+publication_year YEAR,
+author_id INT NOT NULL,
+genre_id INT NOT NULL, 
+FOREIGN KEY (author_id) REFERENCES authors(author_id),
+FOREIGN KEY (genre_id) REFERENCES genres(genre_id)
+);
+
+CREATE TABLE IF NOT EXISTS `users`
+(user_id INT auto_increment PRIMARY KEY,
+username VARCHAR(50) NOT NULL,
+email VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS `borrowed_books`
+(borrow_id INT auto_increment PRIMARY KEY,
+book_id INT NOT NULL,
+user_id INT NOT NULL, 
+borrow_date DATE NOT NULL,
+return_date DATE NOT NULL,
+FOREIGN KEY (book_id) REFERENCES books(book_id),
+FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+
+# 2
+
+INSERT INTO authors(author_name) VALUES ('Agatha Christie'),('Joanne Rowling');
+
+INSERT INTO genres(genre_name) VALUES ('detective'),('fantasy');
+
+INSERT INTO books(title, publication_year, author_id, genre_id) VALUES 
+('Murder on the Orient Express', 1934, 1, 1),
+('Harry Potter and the Philosopher\'s Stone', 1997, 2, 2);
+
+INSERT INTO users(username, email) VALUES 
+('Max Brown', 'max@mail.com'),
+('Ann Smith', 'ann@mail.com');
+
+INSERT INTO borrowed_books(book_id, user_id, borrow_date, return_date) VALUES 
+(1, 2, '2026-02-20', '2026-03-20'),
+(2, 1, '2026-02-25', '2026-03-25');
+
+
+# 3
+
+USE mydb;
+
+SELECT *
+FROM order_details od
+INNER JOIN orders o ON od.order_id = o.id
+INNER JOIN customers cs ON o.customer_id = cs.id
+INNER JOIN products pr ON od.product_id = pr.id
+INNER JOIN categories cg ON pr.category_id = cg.id
+INNER JOIN employees em ON o.employee_id = em.employee_id
+INNER JOIN suppliers sp ON pr.supplier_id = sp.id
+INNER JOIN shippers sh ON o.shipper_id = shipper_id
+
+
+# 4 - 1
+
+SELECT count(*)
+FROM order_details od
+INNER JOIN orders o ON od.order_id = o.id
+INNER JOIN customers cs ON o.customer_id = cs.id
+INNER JOIN products pr ON od.product_id = pr.id
+INNER JOIN categories cg ON pr.category_id = cg.id
+INNER JOIN employees em ON o.employee_id = em.employee_id
+INNER JOIN suppliers sp ON pr.supplier_id = sp.id
+INNER JOIN shippers sh ON o.shipper_id = shipper_id
+
+
+# 4 - 2
+
+SELECT count(*)
+FROM order_details od
+RIGHT JOIN orders o ON od.order_id = o.id
+RIGHT JOIN customers cs ON o.customer_id = cs.id
+LEFT JOIN products pr ON od.product_id = pr.id
+LEFT JOIN categories cg ON pr.category_id = cg.id
+LEFT JOIN employees em ON o.employee_id = em.employee_id
+LEFT JOIN suppliers sp ON pr.supplier_id = sp.id
+LEFT JOIN shippers sh ON o.shipper_id = shipper_id
+
+Було виявлено, що кількість відображених результатів змінюється залежно від вибраного типу JOIN.
+Причина в тому, що INNER тільки ті рядки, де є збіг в обох таблицях, в цьому випадку рядків найменше.
+При LEFT будуть як мінімум всі рядки з лівої, плюс можливі дублікати, якщо зв’язок 1:N. 
+Аалогічно з RIGHT.
+ 
+# 4 - 3
+
+SELECT *
+FROM order_details od
+INNER JOIN orders o ON od.order_id = o.id
+INNER JOIN customers cs ON o.customer_id = cs.id
+INNER JOIN products pr ON od.product_id = pr.id
+INNER JOIN categories cg ON pr.category_id = cg.id
+INNER JOIN employees em ON o.employee_id = em.employee_id
+INNER JOIN suppliers sp ON pr.supplier_id = sp.id
+INNER JOIN shippers sh ON o.shipper_id = shipper_id
+WHERE em.employee_id > 3 AND em.employee_id  <= 10
+
+# 4 - 4
+
+SELECT cg.name, count(*) as qty, AVG (od.quantity) as average
+FROM order_details od
+INNER JOIN orders o ON od.order_id = o.id
+INNER JOIN customers cs ON o.customer_id = cs.id
+INNER JOIN products pr ON od.product_id = pr.id
+INNER JOIN categories cg ON pr.category_id = cg.id
+INNER JOIN employees em ON o.employee_id = em.employee_id
+INNER JOIN suppliers sp ON pr.supplier_id = sp.id
+INNER JOIN shippers sh ON o.shipper_id = shipper_id
+GROUP BY cg.name
+
+# 4 - 5
+
+SELECT cg.name, count(*) as qty, AVG (od.quantity) as average
+FROM order_details od
+INNER JOIN orders o ON od.order_id = o.id
+INNER JOIN customers cs ON o.customer_id = cs.id
+INNER JOIN products pr ON od.product_id = pr.id
+INNER JOIN categories cg ON pr.category_id = cg.id
+INNER JOIN employees em ON o.employee_id = em.employee_id
+INNER JOIN suppliers sp ON pr.supplier_id = sp.id
+INNER JOIN shippers sh ON o.shipper_id = shipper_id
+GROUP BY cg.name
+HAVING average > 21
+
+# 4 - 6
+
+SELECT cg.name, count(*) as qty, AVG (od.quantity) as average
+FROM order_details od
+INNER JOIN orders o ON od.order_id = o.id
+INNER JOIN customers cs ON o.customer_id = cs.id
+INNER JOIN products pr ON od.product_id = pr.id
+INNER JOIN categories cg ON pr.category_id = cg.id
+INNER JOIN employees em ON o.employee_id = em.employee_id
+INNER JOIN suppliers sp ON pr.supplier_id = sp.id
+INNER JOIN shippers sh ON o.shipper_id = shipper_id
+GROUP BY cg.name
+HAVING average > 21
+ORDER BY qty DESC
+
+# 4 - 7
+
+SELECT cg.name, count(*) as qty, AVG (od.quantity) as average
+FROM order_details od
+INNER JOIN orders o ON od.order_id = o.id
+INNER JOIN customers cs ON o.customer_id = cs.id
+INNER JOIN products pr ON od.product_id = pr.id
+INNER JOIN categories cg ON pr.category_id = cg.id
+INNER JOIN employees em ON o.employee_id = em.employee_id
+INNER JOIN suppliers sp ON pr.supplier_id = sp.id
+INNER JOIN shippers sh ON o.shipper_id = shipper_id
+GROUP BY cg.name
+HAVING average > 21
+ORDER BY qty DESC
+LIMIT 4 OFFSET 1
+
+
